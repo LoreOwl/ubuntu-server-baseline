@@ -1,3 +1,4 @@
+![Lint & Validate](https://github.com/LoreOwl/ubuntu-server-baseline/actions/workflows/lint.yml/badge.svg)
 # ubuntu-server-baseline
 
 Single interactive Bash script that takes a fresh Ubuntu 24.04 LTS install from stock to a hardened, monitored Docker host. One run, one reboot, done.
