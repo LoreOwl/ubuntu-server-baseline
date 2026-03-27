@@ -11,10 +11,7 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install ShellCheck
-        run: sudo apt-get install -y shellcheck
+      - uses: actions/checkout@v5
 
       - name: Run ShellCheck
         run: shellcheck --severity=warning server_setup.sh
@@ -23,7 +20,7 @@ jobs:
     name: Bash syntax check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Parse script (bash -n)
         run: bash -n server_setup.sh
@@ -32,24 +29,27 @@ jobs:
     name: Compose YAML validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install yq
-        run: sudo snap install yq
+      - uses: actions/checkout@v5
 
       - name: Extract and validate Compose YAML
         run: |
-          # Extract the YAML between the heredoc markers
-          sed -n "/^read -r -d '' COMPOSE_YAML <<'COMPOSE_EOF'/,/^COMPOSE_EOF/p" server_setup.sh \
-            | tail -n +2 \
-            | head -n -1 \
-            > /tmp/compose.yaml
+          # Extract YAML between heredoc markers using awk (more reliable than sed)
+          awk "/^read -r -d .* COMPOSE_YAML/{found=1; next} /^COMPOSE_EOF/{found=0} found" server_setup.sh > /tmp/compose.yaml
 
-          # Replace image placeholders with valid strings so the YAML parses
-          sed -i 's/PROMETHEUS_IMAGE_PLACEHOLDER/prom\/prometheus:latest/' /tmp/compose.yaml
-          sed -i 's/NODE_EXPORTER_IMAGE_PLACEHOLDER/prom\/node-exporter:latest/' /tmp/compose.yaml
-          sed -i 's/GRAFANA_IMAGE_PLACEHOLDER/grafana\/grafana:latest/' /tmp/compose.yaml
+          # Replace image placeholders so the YAML parses
+          sed -i 's|PROMETHEUS_IMAGE_PLACEHOLDER|prom/prometheus:latest|' /tmp/compose.yaml
+          sed -i 's|NODE_EXPORTER_IMAGE_PLACEHOLDER|prom/node-exporter:latest|' /tmp/compose.yaml
+          sed -i 's|GRAFANA_IMAGE_PLACEHOLDER|grafana/grafana:latest|' /tmp/compose.yaml
 
-          # Validate YAML structure
-          yq eval '.' /tmp/compose.yaml > /dev/null
-          echo "Compose YAML is valid"
+          # Show what was extracted (visible in logs if it fails again)
+          echo "--- Extracted YAML ---"
+          head -5 /tmp/compose.yaml
+          echo "--- (truncated) ---"
+
+          # Validate YAML structure using python (pre-installed, no snap needed)
+          python3 -c "
+          import yaml, sys
+          with open('/tmp/compose.yaml') as f:
+              yaml.safe_load(f)
+          print('Compose YAML is valid')
+          "
