@@ -1,0 +1,55 @@
+name: Lint & Validate
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck
+        run: shellcheck --severity=warning server_setup.sh
+
+  syntax-check:
+    name: Bash syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse script (bash -n)
+        run: bash -n server_setup.sh
+
+  validate-compose:
+    name: Compose YAML validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        run: sudo snap install yq
+
+      - name: Extract and validate Compose YAML
+        run: |
+          # Extract the YAML between the heredoc markers
+          sed -n "/^read -r -d '' COMPOSE_YAML <<'COMPOSE_EOF'/,/^COMPOSE_EOF/p" server_setup.sh \
+            | tail -n +2 \
+            | head -n -1 \
+            > /tmp/compose.yaml
+
+          # Replace image placeholders with valid strings so the YAML parses
+          sed -i 's/PROMETHEUS_IMAGE_PLACEHOLDER/prom\/prometheus:latest/' /tmp/compose.yaml
+          sed -i 's/NODE_EXPORTER_IMAGE_PLACEHOLDER/prom\/node-exporter:latest/' /tmp/compose.yaml
+          sed -i 's/GRAFANA_IMAGE_PLACEHOLDER/grafana\/grafana:latest/' /tmp/compose.yaml
+
+          # Validate YAML structure
+          yq eval '.' /tmp/compose.yaml > /dev/null
+          echo "Compose YAML is valid"

@@ -1,0 +1,19 @@
+# Editor swap/backup files
+*.swp
+*.swo
+*~
+*.bak
+
+# OS metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE/editor directories
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Logs
+*.log

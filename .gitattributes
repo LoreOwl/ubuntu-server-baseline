@@ -1,0 +1,12 @@
+# Ensure GitHub detects the repo as Shell
+*.sh linguist-language=Shell
+
+# Normalize line endings (LF) for shell scripts
+*.sh text eol=lf
+
+# Mark markdown as prose for better diffs
+*.md linguist-documentation=false
+*.md diff=markdown
+
+# YAML workflow files
+*.yml text eol=lf
