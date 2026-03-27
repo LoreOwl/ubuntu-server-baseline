@@ -1,4 +1,6 @@
 ![Lint & Validate](https://github.com/LoreOwl/ubuntu-server-baseline/actions/workflows/lint.yml/badge.svg)
+
+I built this to eliminate the 70-minute manual setup process every time I provision a new VM.
 # ubuntu-server-baseline
 
 Single interactive Bash script that takes a fresh Ubuntu 24.04 LTS install from stock to a hardened, monitored Docker host. One run, one reboot, done.
