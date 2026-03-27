@@ -54,9 +54,9 @@ chmod +x server_setup.sh && sudo bash server_setup.sh
 
 **Single script, no Ansible.** This is purpose-built for provisioning one machine from bare metal. Ansible adds a control node dependency and abstraction layers that aren't justified for a single-host setup. The script is readable top-to-bottom and runs in the order it reads.
 
-**Interactive credential entry.** Passwords are prompted at runtime with confirmation, never hardcoded in the file. Safe to commit the script to version control as-is.
+**Interactive credential entry.** Passwords are prompted at runtime with confirmation, not hardcoded in the file. Safe to commit the script to version control as-is.
 
-**Phased execution with debug checks.** Each phase ends with validation checks that report pass/fail status. A failed check warns but doesn't halt, since the phase already completed its work. This makes it easy to see exactly where things went wrong on a partial run.
+**Phased execution with debug checks.** Each phase ends with validation checks that report pass/fail status. A failed check warns and doesn't halt the script, since the phase already completed its work. This makes it easy to see exactly where things went wrong on a partial run.
 
 **Portainer API-driven stack deployment.** The monitoring stack is deployed through Portainer's API rather than `docker compose up`, so it appears in Portainer's UI as a managed stack from the start.
 
